@@ -17,41 +17,42 @@ def trainModel():
     # Load the JSON data
     with open('baza_pozycji.json') as f:
         data = json.load(f)
+        
+    max_skan_entries = max(len(item["skan"]) for item in data)
+    columns = [f"RSSI_{i+1}" if i % 2 == 0 else f"MAC_{i+1}" for i in range(max_skan_entries * 2)]
 
+    df = pd.DataFrame()
+    for item in data:
+        xy_values = list(item["XY"].values())
+        scan_values = []
+        for scan in item["skan"]:
+            scan_values.append(scan["RSSI"])
+            scan_values.append(scan["MAC"])
+        row_values = xy_values + scan_values
+        df = df.append(pd.Series(row_values), ignore_index=True)
+
+
+    df.drop(columns=[2], inplace=True)
+    df.columns = ["X", "Y"] + columns
+    df.fillna(0, inplace=True)
+    print(df)
     # Convert JSON data to pandas DataFrame
-    df = pd.json_normalize(data, record_path=['skan'], meta=['XY'])
-    df = pd.concat([df.drop(columns=['XY']), pd.json_normalize(df['XY']).astype(float)], axis=1)
-
-    # rows = []
-    # for entry in data:
-    #     xy = entry['XY']
-    #     skan = entry['skan']
-    #     row = {
-    #         'X': xy['X'],
-    #         'Y': xy['Y'],
-    #         'Z': xy['Z']
-    #     }
-    #     for i, access_point in enumerate(skan):
-    #         row[f'MAC_{i+1}'] = access_point['MAC']
-    #         row[f'RSSI_{i+1}'] = access_point['RSSI']
-    #     rows.append(row)
-
-    # df = pd.DataFrame(rows)
-
-
-    # Encode the MAC column using one-hot encoding
-    #enc = OneHotEncoder()
-    #MAC_encoded = enc.fit_transform(df[['MAC']])
-    #MAC_encoded = pd.DataFrame(MAC_encoded.toarray(), columns=enc.get_feature_names_out(['MAC']))
-    #df = pd.concat([df.drop('MAC', axis=1), MAC_encoded], axis=1)
+    #df = pd.json_normalize(data, record_path=['skan'], meta=['XY'])
+    #df = pd.concat([df.drop(columns=['XY']), pd.json_normalize(df['XY']).astype(float)], axis=1)
 
     # Encode the MAC column using label encoding
     enc = LabelEncoder()
-    df['MAC_encoded'] = enc.fit_transform(df['MAC'])
-    df.drop(columns=['MAC'], inplace=True)
+    for i in range(max_skan_entries * 2):
+        if not (i % 2 == 0):
+            df[f'MAC_encoded_{i+1}'] = enc.fit_transform(df[f'MAC_{i+1}'].astype(str))
+            df.drop(columns=[f'MAC_{i+1}'], inplace=True)
+    #df['MAC_encoded'] = enc.fit_transform(df['MAC'])
+    #df.drop(columns=['MAC'], inplace=True)
+    
+    print(df)
 
     # Split the data into training and testing sets
-    X = df[['MAC_encoded', 'RSSI']]
+    X = df.drop(["X", "Y"], axis=1)
     y = df[['X', 'Y']]
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
@@ -60,28 +61,21 @@ def trainModel():
     scaler = StandardScaler()
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.transform(X_test)
-
-    # Create the neural network model
-    #model = MLPRegressor(hidden_layer_sizes=(20, 10), max_iter=10000, activation='relu', solver='adam', alpha=0.0001, 
-    #                     batch_size='auto', learning_rate='constant', learning_rate_init=0.001, power_t=0.5, 
-    #                     momentum=0.9, nesterovs_momentum=True, early_stopping=False, validation_fraction=0.1, 
-    #                     beta_1=0.9, beta_2=0.999, epsilon=1e-08, n_iter_no_change=10, max_fun=15000, 
-    #                     verbose=False, warm_start=False)
-    #model.out_activation_ = 'identity'
+    X = scaler.fit_transform(X)
 
 
     model = RandomForestRegressor(n_estimators=100, random_state=42)
 
-    model.fit(X_train, y_train)
+    model.fit(X, y)
 
     # Make predictions on test data and evaluate model performance
     y_pred = model.predict(X_test)
     score = model.score(X_test, y_test)
     mse = mean_squared_error(y_test, y_pred)
     rmse = mse**.5
-    print('Model Score:', score)
+    #print('Model Score:', score)
     #print(y_pred)
-    print(rmse)
+    #print(rmse)
     
     with open('model.pkl', 'wb') as f:
         pickle.dump(model, f)
@@ -194,6 +188,7 @@ def start_session():
         return make_response('Session started')
     else:
         return make_response('Session already started')
+
 
 if __name__ == '__main__':
     if not os.path.exists('./model.pkl'):
