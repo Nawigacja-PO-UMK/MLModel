@@ -88,8 +88,10 @@ def loadModel():
 
 
 def test(model, dataPath):
-    with open(dataPath) as f:
-        data = json.load(f)
+    if dataPath:
+        with open(dataPath) as f:
+            data = json.load(f)
+    else: raise Exception("Nie podano pliku")
         
     max_skan_entries = max(len(item["skan"]) for item in data)
     columns = [f"RSSI_{i+1}" if i % 2 == 0 else f"MAC_{i+1}" for i in range(max_skan_entries * 2)]
