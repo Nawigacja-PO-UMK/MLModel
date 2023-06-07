@@ -119,7 +119,7 @@ def test(model, dataPath):
     df.drop(df.columns[-2:], axis=1, inplace=True)
     print(df)
     y_pred = model.predict(df)
-    return y_pred
+    return jsonify(y_pred)
 
 def main(argv):
     if not os.path.exists('./model.pkl'):
