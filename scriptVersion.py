@@ -1,24 +1,22 @@
 import json
 import pandas as pd
-import numpy as np
 import os
 import pickle
-import time
-import subprocess
-import logging
-from flask import Flask, request, jsonify, make_response, session
+import sys
 from sklearn.model_selection import train_test_split
-from sklearn.neural_network import MLPRegressor
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.metrics import mean_squared_error
+
+max_entries = None
 
 def trainModel():
     # Load the JSON data
     with open('baza_pozycji.json') as f:
         data = json.load(f)
         
-    max_skan_entries = max(len(item["skan"]) for item in data)
+    #max_skan_entries = max(len(item["skan"]) for item in data)
+    max_skan_entries = max_entries
     columns = [f"RSSI_{i+1}" if i % 2 == 0 else f"MAC_{i+1}" for i in range(max_skan_entries * 2)]
 
     df = pd.DataFrame()
@@ -94,6 +92,7 @@ def test(model, dataPath):
     else: raise Exception("Nie podano pliku")
         
     max_skan_entries = max(len(item["skan"]) for item in data)
+    max_entries = max_skan_entries
     columns = [f"RSSI_{i+1}" if i % 2 == 0 else f"MAC_{i+1}" for i in range(max_skan_entries * 2)]
 
     df = pd.DataFrame()
@@ -107,7 +106,7 @@ def test(model, dataPath):
     df.columns = columns
 
     #df = pd.DataFrame(new_data, columns=columns)
-    print(df)
+    #print(df)
     #df = pd.json_normalize(data, record_path=['skan'])
     #df = pd.concat([df.drop(columns=['XY']), pd.json_normalize(df['XY']).astype(float)], axis=1)
     enc = LabelEncoder()
@@ -117,12 +116,17 @@ def test(model, dataPath):
             df.drop(columns=[f'MAC_{i+1}'], inplace=True)
     df.fillna(0, inplace=True)
     df.drop(df.columns[-2:], axis=1, inplace=True)
-    print(df)
+    #print(df)
     y_pred = model.predict(df)
-    return jsonify(y_pred)
+    return y_pred
 
 def main(argv):
     if not os.path.exists('./model.pkl'):
         trainModel()
+    #argv = "D:/MachineLearning/baza_test.jos"
+    #print(argv)
     model = loadModel()
-    return test(model, argv)
+    print(test(model, argv[1]))
+
+if __name__ == "__main__":
+    main(sys.argv)
