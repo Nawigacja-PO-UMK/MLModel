@@ -118,7 +118,9 @@ def test(model, dataPath):
     df.drop(df.columns[-2:], axis=1, inplace=True)
     #print(df)
     y_pred = model.predict(df)
-    return y_pred
+    predictions = y_pred.tolist()
+    data = {'XY': predictions}
+    return data
 
 def main(argv):
     if not os.path.exists('./model.pkl'):
@@ -126,7 +128,9 @@ def main(argv):
     #argv = "D:/MachineLearning/baza_test.jos"
     #print(argv)
     model = loadModel()
-    print(test(model, argv[1]))
+    with open("./predictions.json", "w") as file:
+        json.dump(test(model, argv[1]),file)
+    #return(test(model, argv[1]))
 
 if __name__ == "__main__":
     main(sys.argv)
