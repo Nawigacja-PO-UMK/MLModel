@@ -31,7 +31,8 @@ def trainModel():
             scan_values.append(scan["RSSI"])
             scan_values.append(scan["MAC"])
         row_values = xy_values + scan_values
-        df = df.append(pd.Series(row_values), ignore_index=True)
+        #df = df.append(pd.Series(row_values), ignore_index=True)
+        df = pd.concat([df, pd.DataFrame([pd.Series(row_values)])], ignore_index=True)
 
 
     df.drop(columns=[2], inplace=True)
@@ -106,7 +107,8 @@ def test(model, dataPath):
         for scan in item["skan"]:
             scan_values.append(scan["RSSI"])
             scan_values.append(scan["MAC"])
-        df = df.append(pd.Series(scan_values), ignore_index=True)
+        df = pd.concat([df, pd.DataFrame([pd.Series(scan_values)])], ignore_index=True)
+        #df = df.append(pd.Series(scan_values), ignore_index=True)
 
     df_columns = df.shape[1]
     if df_columns < max_columns:
