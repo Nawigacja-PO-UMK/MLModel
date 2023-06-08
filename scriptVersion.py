@@ -1,5 +1,6 @@
 import json
 import pandas as pd
+import numpy as np
 import os
 import pickle
 import sys
@@ -8,15 +9,18 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.metrics import mean_squared_error
 
-max_entries = None
+max_entries = 14
 
 def trainModel():
     # Load the JSON data
+    global max_entries
+    print(max_entries)
     with open('baza_pozycji.json') as f:
         data = json.load(f)
         
-    #max_skan_entries = max(len(item["skan"]) for item in data)
-    max_skan_entries = max_entries
+    max_skan_entries = max(len(item["skan"]) for item in data)
+    max_entries = max_skan_entries + 1
+    print(max_entries)
     columns = [f"RSSI_{i+1}" if i % 2 == 0 else f"MAC_{i+1}" for i in range(max_skan_entries * 2)]
 
     df = pd.DataFrame()
@@ -33,7 +37,7 @@ def trainModel():
     df.drop(columns=[2], inplace=True)
     df.columns = ["X", "Y"] + columns
     df.fillna(0, inplace=True)
-    print(df)
+    #print(df)
     # Convert JSON data to pandas DataFrame
     #df = pd.json_normalize(data, record_path=['skan'], meta=['XY'])
     #df = pd.concat([df.drop(columns=['XY']), pd.json_normalize(df['XY']).astype(float)], axis=1)
@@ -47,7 +51,7 @@ def trainModel():
     #df['MAC_encoded'] = enc.fit_transform(df['MAC'])
     #df.drop(columns=['MAC'], inplace=True)
     
-    print(df)
+    #print(df)
 
     # Split the data into training and testing sets
     X = df.drop(["X", "Y"], axis=1)
@@ -91,8 +95,9 @@ def test(model, dataPath):
             data = json.load(f)
     else: raise Exception("Nie podano pliku")
         
-    max_skan_entries = max(len(item["skan"]) for item in data)
-    max_entries = max_skan_entries
+    #max_skan_entries = max(len(item["skan"]) for item in data)
+    max_skan_entries = max_entries
+    max_columns = max_skan_entries * 2
     columns = [f"RSSI_{i+1}" if i % 2 == 0 else f"MAC_{i+1}" for i in range(max_skan_entries * 2)]
 
     df = pd.DataFrame()
@@ -102,6 +107,12 @@ def test(model, dataPath):
             scan_values.append(scan["RSSI"])
             scan_values.append(scan["MAC"])
         df = df.append(pd.Series(scan_values), ignore_index=True)
+
+    df_columns = df.shape[1]
+    if df_columns < max_columns:
+        missing_columns = max_columns - df_columns
+        missing_data = pd.DataFrame(np.zeros((df.shape[0], missing_columns)), columns=[f'Missing_{i+1}' for i in range(missing_columns)])
+        df = pd.concat([df, missing_data], axis=1)
 
     df.columns = columns
 
