@@ -26,6 +26,7 @@ def trainModel():
     df = pd.DataFrame()
     for item in data:
         xy_values = list(item["XY"].values())
+        print(xy_values)
         scan_values = []
         for scan in item["skan"]:
             scan_values.append(scan["RSSI"])
@@ -33,12 +34,12 @@ def trainModel():
         row_values = xy_values + scan_values
         #df = df.append(pd.Series(row_values), ignore_index=True)
         df = pd.concat([df, pd.DataFrame([pd.Series(row_values)])], ignore_index=True)
+    print(df)
 
-
-    df.drop(columns=[2], inplace=True)
-    df.columns = ["X", "Y"] + columns
+    #df.drop(columns=[2], inplace=True)
+    df.columns = ["X", "Y", "Z"] + columns
     df.fillna(0, inplace=True)
-    #print(df)
+    print(df)
     # Convert JSON data to pandas DataFrame
     #df = pd.json_normalize(data, record_path=['skan'], meta=['XY'])
     #df = pd.concat([df.drop(columns=['XY']), pd.json_normalize(df['XY']).astype(float)], axis=1)
@@ -52,11 +53,11 @@ def trainModel():
     #df['MAC_encoded'] = enc.fit_transform(df['MAC'])
     #df.drop(columns=['MAC'], inplace=True)
     
-    #print(df)
+    print(df)
 
     # Split the data into training and testing sets
-    X = df.drop(["X", "Y"], axis=1)
-    y = df[['X', 'Y']]
+    X = df.drop(["X", "Y", "Z"], axis=1)
+    y = df[['X', 'Y', 'Z']]
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
