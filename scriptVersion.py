@@ -51,7 +51,8 @@ def trainModel():
         if not (i % 2 == 0):
             #df[f'MAC_encoded_{i+1}'] = enc.fit_transform(df[f'MAC_{i+1}'].astype(str))
             df['MAC_encoded_' + str(i+1)] = enc.fit_transform(df['MAC_' + str(i+1)].astype(str))
-            df.drop(columns=[f'MAC_{i+1}'], inplace=True)
+            #df.drop(columns=[f'MAC_{i+1}'], inplace=True)
+            df.drop(columns=['MAC_' + str(i+1)], inplace=True)
     #df['MAC_encoded'] = enc.fit_transform(df['MAC'])
     #df.drop(columns=['MAC'], inplace=True)
     
@@ -131,7 +132,8 @@ def test(model, dataPath):
         if not (i % 2 == 0):
             #df[f'MAC_encoded_{i+1}'] = enc.fit_transform(df[f'MAC_{i+1}'])
             df['MAC_encoded_' + str(i+1)] = enc.fit_transform(df['MAC_' + str(i+1)].astype(str))
-            df.drop(columns=[f'MAC_{i+1}'], inplace=True)
+            #df.drop(columns=[f'MAC_{i+1}'], inplace=True)
+            df.drop(columns=['MAC_' + str(i+1)], inplace=True)
     df.fillna(0, inplace=True)
     df.drop(df.columns[-2:], axis=1, inplace=True)
     #print(df)
