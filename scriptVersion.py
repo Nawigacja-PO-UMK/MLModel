@@ -21,7 +21,8 @@ def trainModel():
     max_skan_entries = max(len(item["skan"]) for item in data)
     max_entries = max_skan_entries + 1
     print(max_entries)
-    columns = [f"RSSI_{i+1}" if i % 2 == 0 else f"MAC_{i+1}" for i in range(max_skan_entries * 2)]
+    #columns = [f"RSSI_{i+1}" if i % 2 == 0 else f"MAC_{i+1}" for i in range(max_skan_entries * 2)]
+    columns = ["RSSI_" + str(i+1) if i % 2 == 0 else "MAC_" + str(i+1) for i in range(max_skan_entries * 2)]
 
     df = pd.DataFrame()
     for item in data:
