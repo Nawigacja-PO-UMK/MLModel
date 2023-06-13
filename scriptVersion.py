@@ -118,7 +118,8 @@ def test(model, dataPath):
     df_columns = df.shape[1]
     if df_columns < max_columns:
         missing_columns = max_columns - df_columns
-        missing_data = pd.DataFrame(np.zeros((df.shape[0], missing_columns)), columns=[f'Missing_{i+1}' for i in range(missing_columns)])
+        #missing_data = pd.DataFrame(np.zeros((df.shape[0], missing_columns)), columns=[f'Missing_{i+1}' for i in range(missing_columns)])
+        missing_data = pd.DataFrame(np.zeros((df.shape[0], missing_columns)), columns=['Missing_' + str(i+1) for i in range(missing_columns)])
         df = pd.concat([df, missing_data], axis=1)
 
     df.columns = columns
