@@ -49,7 +49,8 @@ def trainModel():
     enc = LabelEncoder()
     for i in range(max_skan_entries * 2):
         if not (i % 2 == 0):
-            df[f'MAC_encoded_{i+1}'] = enc.fit_transform(df[f'MAC_{i+1}'].astype(str))
+            #df[f'MAC_encoded_{i+1}'] = enc.fit_transform(df[f'MAC_{i+1}'].astype(str))
+            df['MAC_encoded_' + str(i+1)] = enc.fit_transform(df['MAC_' + str(i+1)].astype(str))
             df.drop(columns=[f'MAC_{i+1}'], inplace=True)
     #df['MAC_encoded'] = enc.fit_transform(df['MAC'])
     #df.drop(columns=['MAC'], inplace=True)
@@ -128,7 +129,8 @@ def test(model, dataPath):
     enc = LabelEncoder()
     for i in range(max_skan_entries * 2):
         if not (i % 2 == 0):
-            df[f'MAC_encoded_{i+1}'] = enc.fit_transform(df[f'MAC_{i+1}'])
+            #df[f'MAC_encoded_{i+1}'] = enc.fit_transform(df[f'MAC_{i+1}'])
+            df['MAC_encoded_' + str(i+1)] = enc.fit_transform(df['MAC_' + str(i+1)].astype(str))
             df.drop(columns=[f'MAC_{i+1}'], inplace=True)
     df.fillna(0, inplace=True)
     df.drop(df.columns[-2:], axis=1, inplace=True)
