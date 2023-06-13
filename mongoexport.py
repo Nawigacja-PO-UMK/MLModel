@@ -1,7 +1,7 @@
 import pymongo
 import json
 
-client = pymongo.MongoClient('mongosh mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000')
+client = pymongo.MongoClient('mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000')
 db = client['skany']
 collection = db['skany_pozycji']
 document = list(collection.find())
