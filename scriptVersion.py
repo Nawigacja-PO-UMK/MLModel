@@ -9,8 +9,6 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.metrics import mean_squared_error
 
-max_entries = 14
-
 def trainModel():
     # Load the JSON data
     global max_entries
@@ -20,7 +18,9 @@ def trainModel():
         
     max_skan_entries = max(len(item["skan"]) for item in data)
     max_entries = max_skan_entries + 1
-    print(max_entries)
+    with open('max_entries.pkl', 'wb') as f:
+        pickle.dump(max_entries, f)
+    #print(max_entries)
     #columns = [f"RSSI_{i+1}" if i % 2 == 0 else f"MAC_{i+1}" for i in range(max_skan_entries * 2)]
     columns = ["RSSI_" + str(i+1) if i % 2 == 0 else "MAC_" + str(i+1) for i in range(max_skan_entries * 2)]
 
@@ -35,7 +35,7 @@ def trainModel():
         row_values = xy_values + scan_values
         #df = df.append(pd.Series(row_values), ignore_index=True)
         df = pd.concat([df, pd.DataFrame([pd.Series(row_values)])], ignore_index=True)
-    print(df)
+    #print(df)
 
     #df.drop(columns=[2], inplace=True)
     df.columns = ["X", "Y", "Z"] + columns
@@ -99,6 +99,9 @@ def test(model, dataPath):
         with open(dataPath) as f:
             data = json.load(f)
     else: raise Exception("Nie podano pliku")
+    
+    with open('max_entries.pkl', 'rb') as f:
+        max_entries = pickle.load(f)
         
     #max_skan_entries = max(len(item["skan"]) for item in data)
     max_skan_entries = max_entries
