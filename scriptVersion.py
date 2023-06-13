@@ -78,9 +78,9 @@ def trainModel():
     score = model.score(X_test, y_test)
     mse = mean_squared_error(y_test, y_pred)
     rmse = mse**.5
-    #print('Model Score:', score)
+    print('Model Score:', score)
     #print(y_pred)
-    #print(rmse)
+    print(rmse)
     
     with open('model.pkl', 'wb') as f:
         pickle.dump(model, f)
