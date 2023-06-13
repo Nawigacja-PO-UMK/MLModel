@@ -11,8 +11,6 @@ from sklearn.metrics import mean_squared_error
 
 def trainModel():
     # Load the JSON data
-    global max_entries
-    print(max_entries)
     with open('baza_pozycji.json') as f:
         data = json.load(f)
         
